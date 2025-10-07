@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 import toast from "react-hot-toast";
+
 // Programmatically Change Pages
 import { useNavigate } from "react-router-dom";
 import { dummyProducts } from "../assets/assets";
@@ -15,7 +16,8 @@ export const AppContext = createContext();
 
 //  Context Provider Component
 export const AppContextProvider = ({ children }) => {
-  const currency = import.meta.VITE_CURRENCY;
+  // for currency
+  const currency = import.meta.env.VITE_CURRENCY;
 
   const navigate = useNavigate();
   const [user, setUser] = useState(false);
@@ -26,6 +28,26 @@ export const AppContextProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState({});
   const [searchQuery, setSearchQuery] = useState({});
 
+  // Get Cart item count
+  const getCartCount = () => {
+    let totalCount = 0;
+    for (const item in cartItems) {
+      totalCount += cartItems[item];
+    }
+    return totalCount;
+  };
+
+  // Get Cart Total Amount
+  const getCartAmount = () => {
+    let totalAmount = 0;
+    for (const item in cartItems) {
+      let itemInfo = products.find((product) => product._id === item);
+      if (cartItems[item] > 0) {
+        totalAmount += itemInfo.offerPrice * cartItems[item];
+      }
+    }
+    return Math.floor(totalAmount * 100) / 100;
+  };
   // Fetch all Products
   const fetchProducts = async () => {
     setProducts(dummyProducts);
@@ -35,8 +57,8 @@ export const AppContextProvider = ({ children }) => {
   const addToCart = (itemId) => {
     let cartData = structuredClone(cartItems);
 
-    if (cartData[itemId]){
-         cartData[itemId] += 1;
+    if (cartData[itemId]) {
+      cartData[itemId] += 1;
     } else {
       cartData[itemId] = 1;
     }
@@ -86,6 +108,8 @@ export const AppContextProvider = ({ children }) => {
     cartItems,
     searchQuery,
     setSearchQuery,
+    getCartCount,
+    getCartAmount,
   };
 
   // All child components inside it
